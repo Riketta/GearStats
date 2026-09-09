@@ -5,7 +5,7 @@
     <defName>GearStats</defName>
     <label>gear</label>
     <description>Sortable stats of all weapons, apparel and turrets on the map.</description>
-    <tabWindowClass>MainTabWindow_WeaponStats</tabWindowClass>
+    <tabWindowClass>MainTabWindow_GearStats</tabWindowClass>
     <order>800</order>
   </MainButtonDef>
 
