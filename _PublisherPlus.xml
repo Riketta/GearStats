@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Configuration>
+  <Title>Gear Stats</Title>
+  <Excluded>
+    <exclude>.git</exclude>
+    <exclude>Source</exclude>
+    <exclude>STEAM.md</exclude>
+    <exclude>TLDR.md</exclude>
+  </Excluded>
+</Configuration>

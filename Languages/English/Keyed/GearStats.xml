@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+  <!-- Shown-filters -->
+  <GearStats.Ground>Ground</GearStats.Ground>
+  <GearStats.Colonists>Colonists</GearStats.Colonists>
+  <GearStats.Friendlies>Friendlies</GearStats.Friendlies>
+  <GearStats.Hostiles>Hostiles</GearStats.Hostiles>
+  <GearStats.Prisoners>Prisoners</GearStats.Prisoners>
+  <GearStats.Corpses>Corpses</GearStats.Corpses>
+  <GearStats.Craftable>Craftable</GearStats.Craftable>
+  <GearStats.Storage>Storage</GearStats.Storage>
+
+  <!-- Tabs -->
+  <GearStats.Ranged>Ranged</GearStats.Ranged>
+  <GearStats.Melee>Melee</GearStats.Melee>
+  <GearStats.Grenades>Grenades</GearStats.Grenades>
+  <GearStats.Other>Other</GearStats.Other>
+  <GearStats.Apparel>Apparel</GearStats.Apparel>
+  <GearStats.Tools>Tools</GearStats.Tools>
+  <GearStats.Turrets>Turrets</GearStats.Turrets>
+
+  <!-- Fixed column headers -->
+  <GearStats.ColName>Name</GearStats.ColName>
+  <GearStats.ColType>Type</GearStats.ColType>
+  <GearStats.ColRange>Range</GearStats.ColRange>
+  <GearStats.ColAccuracy>Accuracy</GearStats.ColAccuracy>
+  <GearStats.ColDPSA>DPS (acc.)</GearStats.ColDPSA>
+
+  <!-- Accuracy radio buttons -->
+  <GearStats.AccRbName.All>All</GearStats.AccRbName.All>
+  <GearStats.AccRbName.Touch>Touch</GearStats.AccRbName.Touch>
+  <GearStats.AccRbName.Short>Short</GearStats.AccRbName.Short>
+  <GearStats.AccRbName.Medium>Medium</GearStats.AccRbName.Medium>
+  <GearStats.AccRbName.Long>Long</GearStats.AccRbName.Long>
+
+  <!-- Column headers ("GearStats.Col" + label) -->
+  <GearStats.ColArmorPenetration>Armor pen.</GearStats.ColArmorPenetration>
+  <GearStats.ColBlunt>Blunt</GearStats.ColBlunt>
+  <GearStats.ColBulk>Bulk</GearStats.ColBulk>
+  <GearStats.ColCooldwn>Cooldown</GearStats.ColCooldwn>
+  <GearStats.ColCounterParry>Ct. parry</GearStats.ColCounterParry>
+  <GearStats.ColDamage>Damage</GearStats.ColDamage>
+  <GearStats.ColDelay>Delay</GearStats.ColDelay>
+  <GearStats.ColDPS>DPS</GearStats.ColDPS>
+  <GearStats.ColHeat>Heat</GearStats.ColHeat>
+  <GearStats.ColHP>HP</GearStats.ColHP>
+  <GearStats.ColICold>Insul. cold</GearStats.ColICold>
+  <GearStats.ColIHeat>Insul. heat</GearStats.ColIHeat>
+  <GearStats.ColMagazineCapacity>Mag. cap.</GearStats.ColMagazineCapacity>
+  <GearStats.ColQuality>Quality</GearStats.ColQuality>
+  <GearStats.ColRadius>Radius</GearStats.ColRadius>
+  <GearStats.ColSharp>Sharp</GearStats.ColSharp>
+  <GearStats.ColSights>Sights</GearStats.ColSights>
+  <GearStats.ColSpread>Spread</GearStats.ColSpread>
+  <GearStats.ColSway>Sway</GearStats.ColSway>
+  <GearStats.ColValue>Value</GearStats.ColValue>
+  <GearStats.ColWarmup>Warmup</GearStats.ColWarmup>
+
+</LanguageData>

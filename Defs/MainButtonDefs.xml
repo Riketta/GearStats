@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <MainButtonDef>
+    <defName>GearStats</defName>
+    <label>gear</label>
+    <description>Sortable stats of all weapons, apparel and turrets on the map.</description>
+    <tabWindowClass>MainTabWindow_WeaponStats</tabWindowClass>
+    <order>800</order>
+  </MainButtonDef>
+
+</Defs>
