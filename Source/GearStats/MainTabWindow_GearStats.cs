@@ -367,7 +367,11 @@ namespace GearStats
                 CollectBuiltTurrets(map);
             }
 
-            SortTab(curTab);
+            foreach (GearKind kind in gear.Keys)
+            {
+                SortTab(kind);
+            }
+
             listUpdateNext = Find.TickManager.TicksGame + GenTicks.TickRareInterval;
             isDirty = false;
         }

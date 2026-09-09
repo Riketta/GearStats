@@ -107,14 +107,17 @@ namespace GearStats
             CeSwayFactor = th.GetStatValue(StatDef.Named("SwayFactor"));
             CeMagazineCapacity = th.GetStatValue(StatDef.Named("MagazineCapacity"));
 
-            foreach (VerbProperties vp in th.def.Verbs)
+            if (th.def?.Verbs != null)
             {
-                string verbClass = vp.verbClass?.FullName;
-                if (verbClass == "CombatExtended.Verb_ShootCE" || verbClass == "CombatExtended.Verb_ShootCEOneUse")
+                foreach (VerbProperties vp in th.def.Verbs)
                 {
-                    Warmup = vp.warmupTime;
-                    MaxRange = vp.range;
-                    break;
+                    string verbClass = vp.verbClass?.FullName;
+                    if (verbClass == "CombatExtended.Verb_ShootCE" || verbClass == "CombatExtended.Verb_ShootCEOneUse")
+                    {
+                        Warmup = vp.warmupTime;
+                        MaxRange = vp.range;
+                        break;
+                    }
                 }
             }
 
