@@ -11,7 +11,7 @@ Fork of "Weapons Tab" by bodlosh, restructured and updated.
 
 A "gear" button appears in the bottom main tab bar. It opens a table of everything
 relevant on the current map, split into tabs: ranged weapons, melee weapons,
-grenades, other weapons, apparel, tools and turrets.
+grenades, apparel and turrets.
 
 - Click any column header to sort by that column, click again to flip the order.
 - Checkboxes filter what is listed: items on the ground, items equipped by

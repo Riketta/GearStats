@@ -9,7 +9,7 @@ plain-text description).
 View stats of every weapon, piece of apparel and turret on the map: damage, DPS, accuracy, range, armor, insulation, market value and quality. Sort by any column, filter by location and owner.
 
 [h3]What it does[/h3]
-[list][*]A "gear" button in the main tab bar opens a table of all gear on the current map, split into ranged, melee, grenades, other, apparel, tools and turrets.
+[list][*]A "gear" button in the main tab bar opens a table of all gear on the current map, split into ranged, melee, grenades, apparel and turrets.
 [*]Click a column header to sort by it, click again to flip the order.
 [*]Filter what is listed: on the ground, equipped by colonists, friendlies, hostiles or prisoners, on corpses, craftable, in storage.
 [*]Switch the ranged accuracy column between average and a single range bracket: touch, short, medium or long.
