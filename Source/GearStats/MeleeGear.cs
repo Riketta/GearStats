@@ -98,9 +98,10 @@ namespace GearStats
                 // StatWorker_MeleeDPS folds the attacker's melee hit chance into the pawn's
                 // DPS; vanilla hides the stat when hit chance is disabled (e.g. some races),
                 // in which case the raw DPS is shown.
-                if (!StatDefOf.MeleeHitChance.Worker.IsDisabledFor(shooter))
+                if (CombatStats.MeleeHitChance == null
+                    || !CombatStats.MeleeHitChance.Worker.IsDisabledFor(shooter))
                 {
-                    Dps *= shooter.GetStatValue(StatDefOf.MeleeHitChance);
+                    Dps *= CombatStats.Value(shooter, CombatStats.MeleeHitChance);
                 }
             }
         }

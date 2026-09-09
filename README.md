@@ -30,7 +30,8 @@ grenades, apparel and turrets.
 - Odyssey unique-weapon traits factor into the stats like they do in game (burst
   count and speed for DPS) and are listed on the weapon's name tooltip.
 - Click a row to jump to the item, and use the debug window (dev mode) to inspect
-  the raw stats of a thing.
+  the raw stats of a thing - or, next to the pawn button, dump the selected
+  pawn's combat stats with the game's own per-stat explanations.
 
 ## Compatibility
 
@@ -59,6 +60,13 @@ grenades, apparel and turrets.
   material multipliers; DPS is the vanilla selection-weighted average across all
   its tools. With a pawn selected both are computed exactly like
   `StatWorker_MeleeAverageDPS` computes them for the wielding pawn, and DPS is
+  multiplied by the pawn's melee hit chance like the vanilla pawn stat
+  (`StatWorker_MeleeDPS`).
+- The combat stat list is curated to mirror vanilla's code, which hardcodes these
+  same links, and is resolved through `DefDatabase` at load: a mod that removes a
+  stat only neutralizes that one adjustment instead of crashing. What modifies
+  each stat is always read at runtime through the regular stat system, so modded
+  traits, genes and hediffs count without any per-mod support.
   multiplied by the pawn's melee hit chance like the vanilla pawn stat
   (`StatWorker_MeleeDPS`).
 

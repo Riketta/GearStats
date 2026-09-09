@@ -150,6 +150,19 @@ namespace GearStats
                 ? (string)"GearStats.PawnTip".Translate()
                 : ShooterTooltip(selectedPawn), 0x4b2d19f3);
             x += width + 25f;
+
+            // Dev shortcut: full dump of the selected pawn's combat stats.
+            if (Prefs.DevMode && selectedPawn != null)
+            {
+                var dump = new Rect(x, y, 50f, 30f);
+                if (Widgets.ButtonText(dump, "dump"))
+                {
+                    Find.WindowStack.Add(new Dialog_GearDebug(selectedPawn));
+                }
+
+                TooltipHandler.TipRegion(dump, "Dump the selected pawn's combat stats with the game's own explanations (dev mode).");
+                x += 50f + 8f;
+            }
         }
 
         /// <summary>Which of the pawn's stats actually change the numbers in this table,
@@ -158,16 +171,16 @@ namespace GearStats
         private static string ShooterTooltip(Pawn pawn)
         {
             var sb = new StringBuilder();
-            AppendShooterEffect(sb, pawn, StatDefOf.AimingDelayFactor, "GearStats.EffAiming".Translate());
-            AppendShooterEffect(sb, pawn, StatDefOf.RangedCooldownFactor, "GearStats.EffRangedCooldown".Translate());
-            AppendShooterEffect(sb, pawn, StatDefOf.ShootingAccuracyPawn, "GearStats.EffShootingAccuracy".Translate());
-            AppendShooterEffect(sb, pawn, StatDefOf.ShootingAccuracyFactor_Touch, "GearStats.EffAccTouch".Translate());
-            AppendShooterEffect(sb, pawn, StatDefOf.ShootingAccuracyFactor_Short, "GearStats.EffAccShort".Translate());
-            AppendShooterEffect(sb, pawn, StatDefOf.ShootingAccuracyFactor_Medium, "GearStats.EffAccMedium".Translate());
-            AppendShooterEffect(sb, pawn, StatDefOf.ShootingAccuracyFactor_Long, "GearStats.EffAccLong".Translate());
-            AppendShooterEffect(sb, pawn, StatDefOf.MeleeDamageFactor, "GearStats.EffMeleeDamage".Translate());
-            AppendShooterEffect(sb, pawn, StatDefOf.MeleeCooldownFactor, "GearStats.EffMeleeCooldown".Translate());
-            AppendShooterEffect(sb, pawn, StatDefOf.MeleeHitChance, "GearStats.EffMeleeHitChance".Translate());
+            AppendShooterEffect(sb, pawn, CombatStats.AimingDelay, "GearStats.EffAiming".Translate());
+            AppendShooterEffect(sb, pawn, CombatStats.RangedCooldown, "GearStats.EffRangedCooldown".Translate());
+            AppendShooterEffect(sb, pawn, CombatStats.ShootingAccuracy, "GearStats.EffShootingAccuracy".Translate());
+            AppendShooterEffect(sb, pawn, CombatStats.AccFactorTouch, "GearStats.EffAccTouch".Translate());
+            AppendShooterEffect(sb, pawn, CombatStats.AccFactorShort, "GearStats.EffAccShort".Translate());
+            AppendShooterEffect(sb, pawn, CombatStats.AccFactorMedium, "GearStats.EffAccMedium".Translate());
+            AppendShooterEffect(sb, pawn, CombatStats.AccFactorLong, "GearStats.EffAccLong".Translate());
+            AppendShooterEffect(sb, pawn, CombatStats.MeleeDamage, "GearStats.EffMeleeDamage".Translate());
+            AppendShooterEffect(sb, pawn, CombatStats.MeleeCooldown, "GearStats.EffMeleeCooldown".Translate());
+            AppendShooterEffect(sb, pawn, CombatStats.MeleeHitChance, "GearStats.EffMeleeHitChance".Translate());
 
             if (sb.Length == 0)
             {
@@ -179,6 +192,11 @@ namespace GearStats
 
         private static void AppendShooterEffect(StringBuilder sb, Pawn pawn, StatDef stat, TaggedString label)
         {
+            if (stat == null)
+            {
+                return;
+            }
+
             float value = pawn.GetStatValue(stat);
             if (Mathf.Approximately(value, 1f))
             {

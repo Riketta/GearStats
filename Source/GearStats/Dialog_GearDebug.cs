@@ -6,11 +6,14 @@ using Verse;
 
 namespace GearStats
 {
-    /// <summary>Dev-mode dump of the raw def data behind one table row.</summary>
+    /// <summary>Dev-mode dump of the raw def data behind one table row, or of the
+    /// combat stats of the selected pawn.</summary>
     internal class Dialog_GearDebug : Window
     {
         private readonly Thing thing;
         private readonly GearItem item;
+        private readonly Pawn pawn;
+        private Vector2 scroll;
 
         public Dialog_GearDebug(GearItem item)
         {
@@ -19,6 +22,14 @@ namespace GearStats
             closeOnClickedOutside = true;
             this.item = item;
             thing = item?.Thing;
+        }
+
+        public Dialog_GearDebug(Pawn pawn)
+        {
+            doCloseX = true;
+            doCloseButton = true;
+            closeOnClickedOutside = true;
+            this.pawn = pawn;
         }
 
         public override Vector2 InitialSize => new Vector2(700f, 700f);
@@ -36,6 +47,12 @@ namespace GearStats
             Text.Font = GameFont.Small;
             Text.Anchor = TextAnchor.UpperLeft;
             GUI.color = Color.white;
+            if (pawn != null)
+            {
+                DrawPawnDump(rect);
+                return;
+            }
+
             if (thing == null)
             {
                 Widgets.Label(rect, "no thing");
@@ -46,6 +63,50 @@ namespace GearStats
             Widgets.Label(new Rect(0f, 0f, 350f, 700f), LeftPane());
             Widgets.Label(new Rect(350f, 0f, 350f, 700f), RightPane());
             GUI.EndGroup();
+        }
+
+        private void DrawPawnDump(Rect rect)
+        {
+            string text = PawnPane();
+            float height = Text.CalcHeight(text, rect.width - 16f) + 10f;
+            var view = new Rect(0f, 0f, rect.width - 16f, height);
+            Widgets.BeginScrollView(rect, ref scroll, view);
+            Widgets.Label(view, text);
+            Widgets.EndScrollView();
+        }
+
+        private string PawnPane()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine(pawn.LabelShortCap + (pawn.Faction != null ? " (" + pawn.Faction.Name + ")" : ""));
+            sb.AppendLine();
+            AppendStat(sb, CombatStats.AimingDelay);
+            AppendStat(sb, CombatStats.RangedCooldown);
+            AppendStat(sb, CombatStats.ShootingAccuracy);
+            AppendStat(sb, CombatStats.AccFactorTouch);
+            AppendStat(sb, CombatStats.AccFactorShort);
+            AppendStat(sb, CombatStats.AccFactorMedium);
+            AppendStat(sb, CombatStats.AccFactorLong);
+            AppendStat(sb, CombatStats.MeleeDamage);
+            AppendStat(sb, CombatStats.MeleeCooldown);
+            AppendStat(sb, CombatStats.MeleeHitChance);
+            sb.AppendLine("--- lifeStage.meleeDamageFactor: "
+                + pawn.ageTracker.CurLifeStage.meleeDamageFactor);
+            return sb.ToString().TrimEndNewlines();
+        }
+
+        private void AppendStat(StringBuilder sb, StatDef stat)
+        {
+            sb.AppendLine("--- " + (stat?.defName ?? "<stat missing>") + " ---");
+            if (stat == null)
+            {
+                return;
+            }
+
+            float value = pawn.GetStatValue(stat);
+            sb.AppendLine("value: " + value.ToString("0.###"));
+            sb.AppendLine(stat.Worker.GetExplanationFull(StatRequest.For(pawn), stat.toStringNumberSense, value));
+            sb.AppendLine();
         }
 
         private string LeftPane()

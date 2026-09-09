@@ -83,25 +83,25 @@ namespace GearStats
         /// accuracy (ShotReport.HitReportFor).</summary>
         protected override void AdjustForShooter(Pawn shooter)
         {
-            Warmup *= shooter.GetStatValue(StatDefOf.AimingDelayFactor);
-            Cooldown *= shooter.GetStatValue(StatDefOf.RangedCooldownFactor);
+            Warmup *= CombatStats.Value(shooter, CombatStats.AimingDelay);
+            Cooldown *= CombatStats.Value(shooter, CombatStats.RangedCooldown);
             if (mainVerb?.rangeStat != null)
             {
                 MaxRange = shooter.GetStatValue(mainVerb.rangeStat);
             }
 
             // Verbs that cannot shoot wild (mortars) do not use the shooter's accuracy.
-            if (mainVerb == null || mainVerb.canGoWild)
+            if ((mainVerb == null || mainVerb.canGoWild) && CombatStats.ShootingAccuracy != null)
             {
-                float pawnAcc = shooter.GetStatValue(StatDefOf.ShootingAccuracyPawn);
+                float pawnAcc = shooter.GetStatValue(CombatStats.ShootingAccuracy);
                 AccuracyTouch = AdjustedAccuracy(AccuracyText.Touch, pawnAcc,
-                    shooter.GetStatValue(StatDefOf.ShootingAccuracyFactor_Touch), StatDefOf.AccuracyTouch);
+                    CombatStats.Value(shooter, CombatStats.AccFactorTouch), StatDefOf.AccuracyTouch);
                 AccuracyShort = AdjustedAccuracy(AccuracyText.Short, pawnAcc,
-                    shooter.GetStatValue(StatDefOf.ShootingAccuracyFactor_Short), StatDefOf.AccuracyShort);
+                    CombatStats.Value(shooter, CombatStats.AccFactorShort), StatDefOf.AccuracyShort);
                 AccuracyMedium = AdjustedAccuracy(AccuracyText.Medium, pawnAcc,
-                    shooter.GetStatValue(StatDefOf.ShootingAccuracyFactor_Medium), StatDefOf.AccuracyMedium);
+                    CombatStats.Value(shooter, CombatStats.AccFactorMedium), StatDefOf.AccuracyMedium);
                 AccuracyLong = AdjustedAccuracy(AccuracyText.Long, pawnAcc,
-                    shooter.GetStatValue(StatDefOf.ShootingAccuracyFactor_Long), StatDefOf.AccuracyLong);
+                    CombatStats.Value(shooter, CombatStats.AccFactorLong), StatDefOf.AccuracyLong);
             }
 
             ComputeDps();

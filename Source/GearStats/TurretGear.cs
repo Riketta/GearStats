@@ -57,7 +57,9 @@ namespace GearStats
                 }
             }
 
-            float turretAcc = th.GetStatValue(StatDefOf.ShootingAccuracyTurret);
+            float turretAcc = CombatStats.ShootingAccuracyTurret != null
+                ? th.GetStatValue(CombatStats.ShootingAccuracyTurret)
+                : 1f;
             bool applyAccuracy = verb == null || verb.canGoWild;
             AccuracyTouch = AdjustedAccuracy(AccuracyText.Touch, turretAcc, gunDef.GetStatValueAbstract(StatDefOf.AccuracyTouch), applyAccuracy);
             AccuracyShort = AdjustedAccuracy(AccuracyText.Short, turretAcc, gunDef.GetStatValueAbstract(StatDefOf.AccuracyShort), applyAccuracy);
