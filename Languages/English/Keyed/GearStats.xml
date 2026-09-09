@@ -55,7 +55,13 @@
   <!-- Pawn shooter selection -->
   <GearStats.PawnNone>Pawn: none</GearStats.PawnNone>
   <GearStats.PawnNamed>Pawn: {0}</GearStats.PawnNamed>
-  <GearStats.PawnTip>Apply the selected pawn's stats (shooting skill, genes, traits, age) to all weapon stats. Range brackets below still gate which accuracy applies where.</GearStats.PawnTip>
+  <GearStats.PawnTip>Apply the selected pawn's stats (shooting skill, genes, traits, age) to all weapon stats. Hover the button to see which stats contribute.</GearStats.PawnTip>
   <GearStats.UniqueTraits>Unique weapon traits: {0}</GearStats.UniqueTraits>
+  <GearStats.EffAiming>Aiming time (ranged, grenades)</GearStats.EffAiming>
+  <GearStats.EffRangedCooldown>Cooldown (ranged, grenades)</GearStats.EffRangedCooldown>
+  <GearStats.EffMeleeCooldown>Cooldown (melee)</GearStats.EffMeleeCooldown>
+  <GearStats.EffMeleeDamage>Damage (melee)</GearStats.EffMeleeDamage>
+  <GearStats.EffLifeStage>Life stage</GearStats.EffLifeStage>
+  <GearStats.ShooterNoEffects>No stat of this pawn changes weapon stats in this table. Shooting skill affects hit chance only, not the stats listed here.</GearStats.ShooterNoEffects>
 
 </LanguageData>

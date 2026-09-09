@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -137,8 +138,56 @@ namespace GearStats
                 OpenPawnMenu();
             }
 
-            TooltipHandler.TipRegion(rect, "GearStats.PawnTip".Translate());
+            TooltipHandler.TipRegion(rect, () => selectedPawn == null
+                ? (string)"GearStats.PawnTip".Translate()
+                : ShooterTooltip(selectedPawn), 0x4b2d19f3);
             x += width + 25f;
+        }
+
+        /// <summary>Which of the pawn's stats actually change the numbers in this table,
+        /// with vanilla's own source breakdown (traits, genes, hediffs, apparel) for
+        /// each. Only non-neutral factors are listed.</summary>
+        private static string ShooterTooltip(Pawn pawn)
+        {
+            var sb = new StringBuilder();
+            AppendShooterEffect(sb, pawn, StatDefOf.AimingDelayFactor, "GearStats.EffAiming".Translate());
+            AppendShooterEffect(sb, pawn, StatDefOf.RangedCooldownFactor, "GearStats.EffRangedCooldown".Translate());
+            AppendShooterEffect(sb, pawn, StatDefOf.MeleeCooldownFactor, "GearStats.EffMeleeCooldown".Translate());
+            AppendShooterEffect(sb, pawn, StatDefOf.MeleeDamageFactor, "GearStats.EffMeleeDamage".Translate());
+
+            if (sb.Length == 0)
+            {
+                return "GearStats.ShooterNoEffects".Translate();
+            }
+
+            return sb.ToString().TrimEndNewlines();
+        }
+
+        private static void AppendShooterEffect(StringBuilder sb, Pawn pawn, StatDef stat, TaggedString label)
+        {
+            float value = pawn.GetStatValue(stat);
+            if (Mathf.Approximately(value, 1f))
+            {
+                return;
+            }
+
+            if (sb.Length > 0)
+            {
+                sb.AppendLine();
+            }
+
+            sb.AppendLine(label + ": ×" + Format.Num(value));
+            sb.Append(stat.Worker.GetExplanationFull(StatRequest.For(pawn), stat.toStringNumberSense, value));
+
+            if (stat == StatDefOf.MeleeDamageFactor)
+            {
+                float lifeStageFactor = pawn.ageTracker.CurLifeStage.meleeDamageFactor;
+                if (!Mathf.Approximately(lifeStageFactor, 1f))
+                {
+                    sb.AppendLine().Append("    ").Append("GearStats.EffLifeStage".Translate())
+                        .Append(": ×").Append(Format.Num(lifeStageFactor));
+                }
+            }
         }
 
         private void OpenPawnMenu()

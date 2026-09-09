@@ -41,9 +41,11 @@ namespace GearStats
             }
         }
 
-        /// <summary>Same shooter scaling as ranged weapons (mirrors vanilla AdjustedCooldown).</summary>
+        /// <summary>Same shooter scaling as ranged weapons (mirrors vanilla AdjustedCooldown
+        /// and the AimingDelayFactor warmup multiplier from Verb.WarmupStance).</summary>
         protected override void AdjustForShooter(Pawn shooter)
         {
+            Warmup *= shooter.GetStatValue(StatDefOf.AimingDelayFactor);
             Cooldown *= shooter.GetStatValue(StatDefOf.RangedCooldownFactor);
             if (mainVerb?.rangeStat != null)
             {

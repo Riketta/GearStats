@@ -77,11 +77,12 @@ namespace GearStats
             ComputeDpsa();
         }
 
-        /// <summary>Vanilla AdjustedCooldown/AdjustedRange math: cooldown scales with the
-        /// shooter's RangedCooldownFactor (genes, traits); a verb with a rangeStat reads
-        /// its range from the shooter.</summary>
+        /// <summary>Vanilla AdjustedCooldown/AdjustedRange math: warmup scales with the
+        /// shooter's AimingDelayFactor (Verb.WarmupStance), cooldown with RangedCooldownFactor
+        /// (genes, traits); a verb with a rangeStat reads its range from the shooter.</summary>
         protected override void AdjustForShooter(Pawn shooter)
         {
+            Warmup *= shooter.GetStatValue(StatDefOf.AimingDelayFactor);
             Cooldown *= shooter.GetStatValue(StatDefOf.RangedCooldownFactor);
             if (mainVerb?.rangeStat != null)
             {

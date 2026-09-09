@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using Verse;
@@ -8,8 +9,11 @@ namespace GearStats
     {
         public float CeCounterParry;
 
-        private Tool bestTool;
-        private VerbProperties meleeVerb;
+        /// <summary>All melee verb/tool pairs of the weapon, like StatWorker_MeleeAverageDPS uses.</summary>
+        private List<VerbUtility.VerbPropertiesWithSource> meleeVerbs = new List<VerbUtility.VerbPropertiesWithSource>();
+
+        /// <summary>Strongest attack; drives the damage/cooldown cells.</summary>
+        private VerbUtility.VerbPropertiesWithSource? bestPair;
 
         public MeleeGear(bool ce) : base(ce)
         {
@@ -19,85 +23,124 @@ namespace GearStats
         {
             base.FillCore(th);
 
-            meleeVerb = th.def?.Verbs?.FirstOrDefault(v => v.IsMeleeAttack);
-
             if (Ce)
             {
                 ArmorPenetration = th.GetStatValue(StatDef.Named("MeleePenetrationFactor"));
                 CeCounterParry = th.GetStatValue(StatDef.Named("MeleeCounterParryBonus"));
             }
 
-            // Show the strongest tool of the weapon (highest damage per second).
-            bestTool = null;
-            if (th.def?.tools != null)
-            {
-                foreach (Tool tool in th.def.tools)
-                {
-                    if (tool.cooldownTime > 0f && (bestTool == null || tool.power / tool.cooldownTime > bestTool.power / bestTool.cooldownTime))
-                    {
-                        bestTool = tool;
-                    }
-                }
-            }
-
-            if (bestTool != null)
-            {
-                Cooldown = bestTool.cooldownTime;
-                Damage = bestTool.power;
-                if (bestTool.capacities != null)
-                {
-                    foreach (ToolCapacityDef capacity in bestTool.capacities)
-                    {
-                        DamageType = capacity.label + " (" + bestTool.label + ")";
-                    }
-                }
-            }
-
-            // Vanilla weapons: quality-weighted average over the melee verbs. In CE the
-            // dedicated stat above is authoritative.
-            if (!Ce && th.def?.Verbs != null && th.def.tools != null)
-            {
-                var meleeVerbs = VerbUtility.GetAllVerbProperties(th.def.Verbs, th.def.tools)
+            meleeVerbs = th.def?.Verbs == null || th.def.tools == null
+                ? new List<VerbUtility.VerbPropertiesWithSource>()
+                : VerbUtility.GetAllVerbProperties(th.def.Verbs, th.def.tools)
                     .Where(x => x.verbProps.IsMeleeAttack)
                     .ToList();
-                if (meleeVerbs.Count > 0)
-                {
-                    ArmorPenetration = meleeVerbs.AverageWeighted(
-                        x => x.verbProps.AdjustedMeleeSelectionWeight(x.tool, null, th.def, th.Stuff, null, false),
-                        x => x.verbProps.AdjustedArmorPenetration(x.tool, null, th.def, th.Stuff, null));
-                }
+
+            PickBestAttack();
+
+            if (bestPair != null)
+            {
+                // Quality and material multipliers included, like vanilla weapon stats.
+                Damage = bestPair.Value.verbProps.AdjustedMeleeDamageAmount(bestPair.Value.tool, null, th.def, th.Stuff, null);
+                Cooldown = bestPair.Value.verbProps.AdjustedCooldown(bestPair.Value.tool, null, th.def, th.Stuff);
+                FillDamageType(bestPair.Value);
             }
 
-            Dps = th.GetStatValue(StatDefOf.MeleeWeapon_AverageDPS);
+            if (!Ce && meleeVerbs.Count > 0)
+            {
+                ArmorPenetration = meleeVerbs.AverageWeighted(
+                    x => RawWeight(x),
+                    x => x.verbProps.AdjustedArmorPenetration(x.tool, null, th.def, th.Stuff, null));
+            }
+
+            // Weighted average like StatWorker_MeleeAverageDPS - computed explicitly so
+            // equipped weapons stay raw here instead of silently using their holder.
+            if (meleeVerbs.Count > 0)
+            {
+                float damage = meleeVerbs.AverageWeighted(
+                    x => RawWeight(x),
+                    x => x.verbProps.AdjustedMeleeDamageAmount(x.tool, null, th.def, th.Stuff, null));
+                float cooldown = meleeVerbs.AverageWeighted(
+                    x => RawWeight(x),
+                    x => x.verbProps.AdjustedCooldown(x.tool, null, th.def, th.Stuff));
+                Dps = cooldown > 0f ? damage / cooldown : 0f;
+            }
         }
 
-        /// <summary>Vanilla AdjustedMeleeDamageAmount/AdjustedCooldown math: damage scales
-        /// with the shooter's life stage and MeleeDamageFactor (genes, traits), cooldown
-        /// with MeleeCooldownFactor; armor penetration is re-weighted with the shooter.</summary>
+        /// <summary>Vanilla shooter math: damage x life stage x MeleeDamageFactor, cooldown
+        /// x MeleeCooldownFactor, armor penetration re-weighted, DPS = weighted damage /
+        /// weighted cooldown (mirrors StatWorker_MeleeAverageDPS with an attacker).</summary>
         protected override void AdjustForShooter(Pawn shooter)
         {
-            if (bestTool != null)
+            if (bestPair != null)
             {
-                Damage = bestTool.AdjustedBaseMeleeDamageAmount(Thing, meleeVerb?.meleeDamageDef)
-                    * shooter.ageTracker.CurLifeStage.meleeDamageFactor
-                    * shooter.GetStatValue(StatDefOf.MeleeDamageFactor);
-                Cooldown = bestTool.AdjustedCooldown(Thing) * shooter.GetStatValue(StatDefOf.MeleeCooldownFactor);
+                Damage = bestPair.Value.verbProps.AdjustedMeleeDamageAmount(bestPair.Value.tool, shooter, Thing, null);
+                Cooldown = bestPair.Value.verbProps.AdjustedCooldown(bestPair.Value.tool, shooter, Thing);
             }
 
-            if (!Ce && Thing.def?.Verbs != null && Thing.def.tools != null)
+            if (!Ce && meleeVerbs.Count > 0)
             {
-                var meleeVerbs = VerbUtility.GetAllVerbProperties(Thing.def.Verbs, Thing.def.tools)
-                    .Where(x => x.verbProps.IsMeleeAttack)
-                    .ToList();
-                if (meleeVerbs.Count > 0)
+                ArmorPenetration = meleeVerbs.AverageWeighted(
+                    x => ShooterWeight(x, shooter),
+                    x => x.verbProps.AdjustedArmorPenetration(x.tool, shooter, Thing, null));
+            }
+
+            if (meleeVerbs.Count > 0)
+            {
+                float damage = meleeVerbs.AverageWeighted(
+                    x => ShooterWeight(x, shooter),
+                    x => x.verbProps.AdjustedMeleeDamageAmount(x.tool, shooter, Thing, null));
+                float cooldown = meleeVerbs.AverageWeighted(
+                    x => ShooterWeight(x, shooter),
+                    x => x.verbProps.AdjustedCooldown(x.tool, shooter, Thing));
+                Dps = cooldown > 0f ? damage / cooldown : 0f;
+            }
+        }
+
+        private void PickBestAttack()
+        {
+            bestPair = null;
+            float bestRating = -1f;
+            foreach (VerbUtility.VerbPropertiesWithSource pair in meleeVerbs)
+            {
+                float damage = pair.tool?.power ?? pair.verbProps.meleeDamageBaseAmount;
+                float cooldown = pair.tool?.cooldownTime ?? pair.verbProps.defaultCooldownTime;
+                if (cooldown <= 0f)
                 {
-                    ArmorPenetration = meleeVerbs.AverageWeighted(
-                        x => x.verbProps.AdjustedMeleeSelectionWeight(x.tool, shooter, Thing.def, Thing.Stuff, null, false),
-                        x => x.verbProps.AdjustedArmorPenetration(x.tool, shooter, Thing, null));
+                    continue;
+                }
+
+                float rating = damage / cooldown;
+                if (rating > bestRating)
+                {
+                    bestRating = rating;
+                    bestPair = pair;
                 }
             }
+        }
 
-            Dps = Cooldown > 0f ? Damage / Cooldown : 0f;
+        private void FillDamageType(VerbUtility.VerbPropertiesWithSource pair)
+        {
+            if (pair.tool?.capacities != null)
+            {
+                foreach (ToolCapacityDef capacity in pair.tool.capacities)
+                {
+                    DamageType = capacity.label + " (" + pair.tool.label + ")";
+                }
+            }
+            else
+            {
+                DamageType = pair.verbProps.meleeDamageDef?.label ?? "";
+            }
+        }
+
+        private float RawWeight(VerbUtility.VerbPropertiesWithSource x)
+        {
+            return x.verbProps.AdjustedMeleeSelectionWeight(x.tool, null, Thing.def, Thing.Stuff, null, false);
+        }
+
+        private float ShooterWeight(VerbUtility.VerbPropertiesWithSource x, Pawn shooter)
+        {
+            return x.verbProps.AdjustedMeleeSelectionWeight(x.tool, shooter, Thing, null, false);
         }
     }
 }
