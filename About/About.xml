@@ -7,7 +7,7 @@
   <supportedVersions>
     <li>1.6</li>
   </supportedVersions>
-  <description>View sortable stats of every weapon, piece of apparel and turret on the current map in one table: damage, DPS, accuracy, range, armor, insulation, market value and quality. Filter what is shown - on the ground, equipped by colonists, friendlies, hostiles or prisoners, on corpses, craftable or in storage - and sort by any column. Basic Combat Extended stats are picked up automatically, and items stored in Weapon Storage or Change Dresser containers are included when those mods are present.
+  <description>View sortable stats of every weapon, piece of apparel and turret on the current map in one table: damage, DPS, accuracy, range, armor, insulation, market value and quality. Filter what is shown - on the ground, equipped by colonists, friendlies, hostiles or prisoners, on corpses, craftable or in storage - and sort by any column. Select a pawn to apply its stats (shooting skill, genes, traits, age) to all weapon stats exactly like the game does when it fires. Odyssey unique-weapon traits factor into burst size and speed and are shown on the name tooltip. Basic Combat Extended stats are picked up automatically, and items stored in Weapon Storage or Change Dresser containers are included when those mods are present.
 
 Fork of "Weapons Tab" by bodlosh.
 

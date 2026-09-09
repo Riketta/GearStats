@@ -17,8 +17,15 @@ grenades, apparel and turrets.
 - Checkboxes filter what is listed: items on the ground, items equipped by
   colonists, friendlies, hostiles or prisoners, items on corpses, craftable
   items and items in storage.
+- Click the pawn button to apply a pawn's stats - shooting skill, genes, traits,
+  age - to all weapon rows: cooldown, melee damage and armor penetration and
+  effective range recompute exactly as the game does when that pawn fires the
+  weapon. "Pawn: none" returns the raw stats.
 - Ranged weapons can switch the accuracy column between all/average and a single
-  range bracket (touch, short, medium, long).
+  range bracket, labeled with its actual distances, e.g. "Short (3-12)". The
+  sorted column survives bracket switches.
+- Odyssey unique-weapon traits factor into the stats like they do in game (burst
+  count and speed for DPS) and are listed on the weapon's name tooltip.
 - Click a row to jump to the item, and use the debug window (dev mode) to inspect
   the raw stats of a thing.
 
@@ -40,6 +47,9 @@ grenades, apparel and turrets.
   every frame.
 - The main tab is registered as a `MainButtonDef`, so other mods can reorder or
   remove it through normal def XML.
+- Shooter-adjusted numbers mirror the vanilla formulas (`VerbProperties.AdjustedCooldown`,
+  `AdjustedMeleeDamageAmount`, `GetDamageFactorFor`) instead of approximating
+  them, so the table always agrees with what the pawn would actually dish out.
 
 ## Build from source
 

@@ -8,6 +8,9 @@ namespace GearStats
     {
         public float CeCounterParry;
 
+        private Tool bestTool;
+        private VerbProperties meleeVerb;
+
         public MeleeGear(bool ce) : base(ce)
         {
         }
@@ -16,6 +19,8 @@ namespace GearStats
         {
             base.FillCore(th);
 
+            meleeVerb = th.def?.Verbs?.FirstOrDefault(v => v.IsMeleeAttack);
+
             if (Ce)
             {
                 ArmorPenetration = th.GetStatValue(StatDef.Named("MeleePenetrationFactor"));
@@ -23,27 +28,27 @@ namespace GearStats
             }
 
             // Show the strongest tool of the weapon (highest damage per second).
-            Tool best = null;
+            bestTool = null;
             if (th.def?.tools != null)
             {
                 foreach (Tool tool in th.def.tools)
                 {
-                    if (tool.cooldownTime > 0f && (best == null || tool.power / tool.cooldownTime > best.power / best.cooldownTime))
+                    if (tool.cooldownTime > 0f && (bestTool == null || tool.power / tool.cooldownTime > bestTool.power / bestTool.cooldownTime))
                     {
-                        best = tool;
+                        bestTool = tool;
                     }
                 }
             }
 
-            if (best != null)
+            if (bestTool != null)
             {
-                Cooldown = best.cooldownTime;
-                Damage = best.power;
-                if (best.capacities != null)
+                Cooldown = bestTool.cooldownTime;
+                Damage = bestTool.power;
+                if (bestTool.capacities != null)
                 {
-                    foreach (ToolCapacityDef capacity in best.capacities)
+                    foreach (ToolCapacityDef capacity in bestTool.capacities)
                     {
-                        DamageType = capacity.label + " (" + best.label + ")";
+                        DamageType = capacity.label + " (" + bestTool.label + ")";
                     }
                 }
             }
@@ -64,6 +69,35 @@ namespace GearStats
             }
 
             Dps = th.GetStatValue(StatDefOf.MeleeWeapon_AverageDPS);
+        }
+
+        /// <summary>Vanilla AdjustedMeleeDamageAmount/AdjustedCooldown math: damage scales
+        /// with the shooter's life stage and MeleeDamageFactor (genes, traits), cooldown
+        /// with MeleeCooldownFactor; armor penetration is re-weighted with the shooter.</summary>
+        protected override void AdjustForShooter(Pawn shooter)
+        {
+            if (bestTool != null)
+            {
+                Damage = bestTool.AdjustedBaseMeleeDamageAmount(Thing, meleeVerb?.meleeDamageDef)
+                    * shooter.ageTracker.CurLifeStage.meleeDamageFactor
+                    * shooter.GetStatValue(StatDefOf.MeleeDamageFactor);
+                Cooldown = bestTool.AdjustedCooldown(Thing) * shooter.GetStatValue(StatDefOf.MeleeCooldownFactor);
+            }
+
+            if (!Ce && Thing.def?.Verbs != null && Thing.def.tools != null)
+            {
+                var meleeVerbs = VerbUtility.GetAllVerbProperties(Thing.def.Verbs, Thing.def.tools)
+                    .Where(x => x.verbProps.IsMeleeAttack)
+                    .ToList();
+                if (meleeVerbs.Count > 0)
+                {
+                    ArmorPenetration = meleeVerbs.AverageWeighted(
+                        x => x.verbProps.AdjustedMeleeSelectionWeight(x.tool, shooter, Thing.def, Thing.Stuff, null, false),
+                        x => x.verbProps.AdjustedArmorPenetration(x.tool, shooter, Thing, null));
+                }
+            }
+
+            Dps = Cooldown > 0f ? Damage / Cooldown : 0f;
         }
     }
 }

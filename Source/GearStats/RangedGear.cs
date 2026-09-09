@@ -1,5 +1,6 @@
 using System;
 using RimWorld;
+using UnityEngine;
 using Verse;
 
 namespace GearStats
@@ -22,6 +23,8 @@ namespace GearStats
         public float CeMagazineCapacity;
         public int BurstShotCount = 1;
         public int TicksBetweenBurstShots;
+
+        private VerbProperties mainVerb;
 
         public RangedGear(bool ce) : base(ce)
         {
@@ -74,6 +77,21 @@ namespace GearStats
             ComputeDpsa();
         }
 
+        /// <summary>Vanilla AdjustedCooldown/AdjustedRange math: cooldown scales with the
+        /// shooter's RangedCooldownFactor (genes, traits); a verb with a rangeStat reads
+        /// its range from the shooter.</summary>
+        protected override void AdjustForShooter(Pawn shooter)
+        {
+            Cooldown *= shooter.GetStatValue(StatDefOf.RangedCooldownFactor);
+            if (mainVerb?.rangeStat != null)
+            {
+                MaxRange = shooter.GetStatValue(mainVerb.rangeStat);
+            }
+
+            ComputeDps();
+            ComputeDpsa();
+        }
+
         private void FillVanilla(Thing th)
         {
             VerbProperties verb = VerbWithProjectile(th);
@@ -82,11 +100,13 @@ namespace GearStats
                 return;
             }
 
+            mainVerb = verb;
             Warmup = verb.warmupTime;
             MaxRange = verb.range;
             MinRange = verb.minRange;
             BurstShotCount = verb.burstShotCount > 0 ? verb.burstShotCount : 1;
             TicksBetweenBurstShots = verb.ticksBetweenBurstShots;
+            ApplyUniqueBurstModifiers(th);
             if (verb.defaultProjectile?.projectile != null)
             {
                 Damage = verb.defaultProjectile.projectile.GetDamageAmount(th);
@@ -98,6 +118,27 @@ namespace GearStats
                 th.GetStatValue(StatDefOf.AccuracyShort),
                 th.GetStatValue(StatDefOf.AccuracyMedium),
                 th.GetStatValue(StatDefOf.AccuracyLong));
+        }
+
+        /// <summary>Unique-weapon burst traits are applied inside Verb at runtime, not
+        /// through stats - mirror that math for the table (mirrors Verb.BurstShotCount).</summary>
+        private void ApplyUniqueBurstModifiers(Thing th)
+        {
+            if (!th.TryGetComp<CompUniqueWeapon>(out CompUniqueWeapon unique))
+            {
+                return;
+            }
+
+            float count = BurstShotCount;
+            float ticks = TicksBetweenBurstShots;
+            foreach (WeaponTraitDef trait in unique.TraitsListForReading)
+            {
+                count *= trait.burstShotCountMultiplier;
+                ticks /= trait.burstShotSpeedMultiplier;
+            }
+
+            BurstShotCount = Mathf.CeilToInt(count);
+            TicksBetweenBurstShots = Mathf.RoundToInt(ticks);
         }
 
         private void FillCe(Thing th)
@@ -114,6 +155,7 @@ namespace GearStats
                     string verbClass = vp.verbClass?.FullName;
                     if (verbClass == "CombatExtended.Verb_ShootCE" || verbClass == "CombatExtended.Verb_ShootCEOneUse")
                     {
+                        mainVerb = vp;
                         Warmup = vp.warmupTime;
                         MaxRange = vp.range;
                         break;

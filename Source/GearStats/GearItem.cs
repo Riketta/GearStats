@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using Verse;
 
@@ -35,8 +36,12 @@ namespace GearStats
 
         protected readonly bool Ce;
 
+        /// <summary>Pawn whose stats are applied to the displayed values; null = raw weapon stats.</summary>
+        protected Pawn Shooter;
+
         public Thing Thing;
         public string Label = "<unknown>";
+        public string Traits;
         public QualityCategory Quality = QualityCategory.Normal;
         public int HpPercent = 100;
         public float MarketValue;
@@ -61,11 +66,16 @@ namespace GearStats
         }
 
         /// <summary>Catch-all wrapper: a modded def with broken stats must never break the table.</summary>
-        public void Fill(Thing th)
+        public void Fill(Thing th, Pawn shooter = null)
         {
+            Shooter = shooter;
             try
             {
                 FillCore(th);
+                if (shooter != null)
+                {
+                    AdjustForShooter(shooter);
+                }
             }
             catch (Exception e)
             {
@@ -77,6 +87,12 @@ namespace GearStats
             }
         }
 
+        /// <summary>Second pass: apply the shooter's stats (skills, genes, traits, age) on
+        /// top of the raw values. Runs only when a pawn is selected.</summary>
+        protected virtual void AdjustForShooter(Pawn shooter)
+        {
+        }
+
         protected virtual void FillCore(Thing th)
         {
             Thing = th;
@@ -86,6 +102,13 @@ namespace GearStats
             if (th.TryGetQuality(out QualityCategory qc))
             {
                 Quality = qc;
+            }
+
+            // Odyssey unique weapons: trait offsets/factors already flow through
+            // GetStatValue; surface the trait list for the name tooltip.
+            if (th.TryGetComp<CompUniqueWeapon>(out CompUniqueWeapon unique) && unique.TraitsListForReading.Count > 0)
+            {
+                Traits = unique.TraitsListForReading.Select(t => t.LabelCap.RawText).ToCommaList().CapitalizeFirst();
             }
         }
 

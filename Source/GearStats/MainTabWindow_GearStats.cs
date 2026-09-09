@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -16,6 +17,9 @@ namespace GearStats
         private readonly bool ce = ModLister.HasActiveModWithName("Combat Extended");
 
         private AccuracyBracket accBracket = AccuracyBracket.All;
+
+        /// <summary>Pawn whose stats are applied to weapon rows; null = raw weapon stats.</summary>
+        private Pawn selectedPawn;
 
         private bool showGround = true;
         private bool showColonists = true;
@@ -113,6 +117,94 @@ namespace GearStats
             }
 
             FilterCheckbox("GearStats.Craftable".Translate(), ref showCraftable, ref x, y);
+
+            // Shooter stats only affect weapon rows.
+            if (curTab == GearKind.Ranged || curTab == GearKind.Melee || curTab == GearKind.Grenades)
+            {
+                DrawPawnButton(y, ref x);
+            }
+        }
+
+        private void DrawPawnButton(float y, ref float x)
+        {
+            string label = selectedPawn == null
+                ? "GearStats.PawnNone".Translate()
+                : "GearStats.PawnNamed".Translate(selectedPawn.LabelShortCap);
+            float width = Text.CalcSize(label).x + 30f;
+            var rect = new Rect(x, y, width, 30f);
+            if (Widgets.ButtonText(rect, label))
+            {
+                OpenPawnMenu();
+            }
+
+            TooltipHandler.TipRegion(rect, "GearStats.PawnTip".Translate());
+            x += width + 25f;
+        }
+
+        private void OpenPawnMenu()
+        {
+            List<FloatMenuOption> options = new List<FloatMenuOption>
+            {
+                new FloatMenuOption("GearStats.PawnNone".Translate(), delegate
+                {
+                    SetShooter(null);
+                })
+            };
+
+            // Pawn picker in the style of the gene extractor / RebuildUntilLegendary:
+            // plain float menu with a shooting-skill suffix per candidate.
+            foreach (Pawn pawn in ShooterCandidates())
+            {
+                Pawn candidate = pawn;
+                string label = candidate.LabelShortCap + ShootingSuffix(candidate);
+                if (candidate.Downed)
+                {
+                    options.Add(new FloatMenuOption(label + ": " + "DownedLower".Translate(), null, candidate, Color.white));
+                }
+                else
+                {
+                    options.Add(new FloatMenuOption(label, delegate
+                    {
+                        SetShooter(candidate);
+                    }, candidate, Color.white));
+                }
+            }
+
+            Find.WindowStack.Add(new FloatMenu(options));
+        }
+
+        private void SetShooter(Pawn pawn)
+        {
+            if (selectedPawn != pawn)
+            {
+                selectedPawn = pawn;
+                isDirty = true;
+            }
+        }
+
+        private static string ShootingSuffix(Pawn pawn)
+        {
+            SkillRecord skill = pawn.skills?.GetSkill(SkillDefOf.Shooting);
+            return skill == null ? "" : " (" + SkillDefOf.Shooting.LabelCap + " " + skill.Level + ")";
+        }
+
+        private static IEnumerable<Pawn> ShooterCandidates()
+        {
+            Map map = Find.CurrentMap;
+            if (map == null)
+            {
+                yield break;
+            }
+
+            foreach (Pawn pawn in map.mapPawns.AllPawnsSpawned
+                .Where(p => p.Faction == Faction.OfPlayer
+                    && (p.RaceProps.Humanlike || p.IsColonyMech)
+                    && p.equipment != null)
+                .OrderBy(p => p.IsColonist ? 0 : (p.IsSlaveOfColony ? 1 : 2))
+                .ThenBy(p => p.LabelShortCap))
+            {
+                yield return pawn;
+            }
         }
 
         private void FilterCheckbox(string label, ref bool value, ref float x, float y)
@@ -167,14 +259,33 @@ namespace GearStats
 
             foreach (AccuracyBracket bracket in Enum.GetValues(typeof(AccuracyBracket)))
             {
-                string text = ("GearStats.AccRbName." + bracket).Translate();
+                string text = BracketLabel(bracket);
                 float width = Text.CalcSize(text).x + 25f;
                 if (Widgets.RadioButtonLabeled(new Rect(x, rect.y, width, 30f), text, accBracket == bracket))
                 {
                     accBracket = bracket;
+                    // Column ids are bracket-independent, so the sorted column persists;
+                    // re-sort immediately with the new bracket's values.
+                    SortTab(curTab);
                 }
 
                 x += width + 25f;
+            }
+        }
+
+        /// <summary>Radio label with the bracket's actual range, e.g. "Short (3-12)".
+        /// Boundaries mirror vanilla accuracy zones: up to 3 touch, up to 12 short,
+        /// up to 25 medium, beyond that long.</summary>
+        private static string BracketLabel(AccuracyBracket bracket)
+        {
+            string name = ("GearStats.AccRbName." + bracket).Translate();
+            switch (bracket)
+            {
+                case AccuracyBracket.Touch: return name + " (0-" + (int)AccuracyText.Touch + ")";
+                case AccuracyBracket.Short: return name + " (" + (int)AccuracyText.Touch + "-" + (int)AccuracyText.Short + ")";
+                case AccuracyBracket.Medium: return name + " (" + (int)AccuracyText.Short + "-" + (int)AccuracyText.Medium + ")";
+                case AccuracyBracket.Long: return name + " (" + (int)AccuracyText.Medium + "+)";
+                default: return name;
             }
         }
 
@@ -200,7 +311,7 @@ namespace GearStats
                 }
                 else
                 {
-                    Texture2D icon = Icons.Get("UI/Icons/Wsh_" + col.Id);
+                    Texture2D icon = Icons.Get("UI/Icons/Wsh_" + (col.Icon ?? col.Id));
                     if (icon != null)
                     {
                         GUI.DrawTexture(rect, icon);
@@ -220,7 +331,7 @@ namespace GearStats
                         SortTab(kind);
                     }
 
-                    if (col.Id == sortId)
+                    if (col.Sortable && col.Id == sortId)
                     {
                         Texture2D arrow = Icons.Get(ascending ? "UI/Icons/Sorting" : "UI/Icons/SortingDescending");
                         if (arrow != null)
@@ -254,7 +365,14 @@ namespace GearStats
             float x = LeadWidth;
             foreach (Column col in columns)
             {
-                Widgets.Label(new Rect(x, y + 3f, col.Width, RowHeight - 3f), col.Cell(item));
+                var cellRect = new Rect(x, y + 3f, col.Width, RowHeight - 3f);
+                Widgets.Label(cellRect, col.Cell(item));
+                if (col == columns[0] && !item.Traits.NullOrEmpty())
+                {
+                    // Unique weapons: surface their traits on the name cell.
+                    TooltipHandler.TipRegion(cellRect, "GearStats.UniqueTraits".Translate(item.Traits));
+                }
+
                 x += col.Width;
             }
         }
@@ -334,6 +452,13 @@ namespace GearStats
                 Log.Message("[GearStats] Refreshing gear list");
             }
 
+            // A dead, destroyed or discarded pawn can no longer lend its stats.
+            if (selectedPawn != null && (selectedPawn.Destroyed || selectedPawn.Discarded))
+            {
+                selectedPawn = null;
+                isDirty = true;
+            }
+
             foreach (GearKind kind in gear.Keys)
             {
                 gear[kind].Clear();
@@ -411,7 +536,7 @@ namespace GearStats
                 default: return;
             }
 
-            item.Fill(th);
+            item.Fill(th, selectedPawn);
             setup?.Invoke(item);
             gear[kind].Add(item);
         }

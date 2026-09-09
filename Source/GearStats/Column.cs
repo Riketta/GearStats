@@ -9,8 +9,13 @@ namespace GearStats
     /// </summary>
     internal sealed class Column
     {
-        /// <summary>Suffix of the "UI/Icons/Wsh_" header texture.</summary>
+        /// <summary>Sort identity; kept stable across accuracy brackets so the sorted
+        /// column survives a bracket switch.</summary>
         public string Id;
+
+        /// <summary>Suffix of the "UI/Icons/Wsh_" header texture; defaults to Id.</summary>
+        public string Icon;
+
         public string HeaderKey;
         public float Width;
 

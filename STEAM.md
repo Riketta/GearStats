@@ -12,7 +12,9 @@ View stats of every weapon, piece of apparel and turret on the map: damage, DPS,
 [list][*]A "gear" button in the main tab bar opens a table of all gear on the current map, split into ranged, melee, grenades, apparel and turrets.
 [*]Click a column header to sort by it, click again to flip the order.
 [*]Filter what is listed: on the ground, equipped by colonists, friendlies, hostiles or prisoners, on corpses, craftable, in storage.
-[*]Switch the ranged accuracy column between average and a single range bracket: touch, short, medium or long.
+[*]Select a pawn and every weapon's stats recompute with that pawn's shooting skill, genes, traits and age - exactly the numbers they would dish out.
+[*]Switch the ranged accuracy column between average and a single range bracket shown with its actual distances, e.g. "Short (3-12)"; the sorted column survives the switch.
+[*]Odyssey unique-weapon traits apply to the stats like in game and are listed on the name tooltip.
 [*]Click a row to jump to the item; a debug window (dev mode) shows raw stats.[/list]
 
 [h3]Compatibility[/h3]

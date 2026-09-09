@@ -9,6 +9,8 @@ namespace GearStats
         public float ExplosionRadius;
         public int ExplosionDelay;
 
+        private VerbProperties mainVerb;
+
         public GrenadeGear(bool ce) : base(ce)
         {
         }
@@ -24,6 +26,7 @@ namespace GearStats
                 return;
             }
 
+            mainVerb = verb;
             Warmup = verb.warmupTime;
             MaxRange = verb.range;
             MinRange = verb.minRange;
@@ -35,6 +38,16 @@ namespace GearStats
                 ExplosionDelay = projectile.explosionDelay;
                 ExplosionRadius = projectile.explosionRadius;
                 ArmorPenetration = projectile.GetArmorPenetration(th);
+            }
+        }
+
+        /// <summary>Same shooter scaling as ranged weapons (mirrors vanilla AdjustedCooldown).</summary>
+        protected override void AdjustForShooter(Pawn shooter)
+        {
+            Cooldown *= shooter.GetStatValue(StatDefOf.RangedCooldownFactor);
+            if (mainVerb?.rangeStat != null)
+            {
+                MaxRange = shooter.GetStatValue(mainVerb.rangeStat);
             }
         }
 

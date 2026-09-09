@@ -52,4 +52,10 @@
   <GearStats.AccRbName.Medium>Medium</GearStats.AccRbName.Medium>
   <GearStats.AccRbName.Long>Long</GearStats.AccRbName.Long>
 
+  <!-- Pawn shooter selection -->
+  <GearStats.PawnNone>Pawn: none</GearStats.PawnNone>
+  <GearStats.PawnNamed>Pawn: {0}</GearStats.PawnNamed>
+  <GearStats.PawnTip>Apply the selected pawn's stats (shooting skill, genes, traits, age) to all weapon stats. Range brackets below still gate which accuracy applies where.</GearStats.PawnTip>
+  <GearStats.UniqueTraits>Unique weapon traits: {0}</GearStats.UniqueTraits>
+
 </LanguageData>

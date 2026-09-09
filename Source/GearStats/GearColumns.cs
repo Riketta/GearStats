@@ -194,8 +194,15 @@ namespace GearStats
 
         private static Column Dpsa(AccuracyBracket bracket)
         {
-            string id = bracket == AccuracyBracket.All ? "dpsa" : "dpsa" + bracket;
-            return Column.Num(id, AccuracyWidth, Key + "DPSA", it => ((RangedGear)it).DpsaFor(bracket), Format.F1);
+            return new Column
+            {
+                Id = "dpsa",
+                Icon = bracket == AccuracyBracket.All ? "dpsa" : "dpsa" + bracket,
+                Width = AccuracyWidth,
+                HeaderKey = Key + "DPSA",
+                Cell = it => Format.F1(((RangedGear)it).DpsaFor(bracket)),
+                FloatKey = it => ((RangedGear)it).DpsaFor(bracket)
+            };
         }
 
         private static Column Value()
@@ -231,14 +238,22 @@ namespace GearStats
                 return new Column
                 {
                     Id = "accuracy",
+                    Icon = "accuracy",
                     Width = AccuracyWidth,
                     HeaderKey = Key + "Accuracy",
                     Cell = it => ((RangedGear)it).AccuracyCell()
                 };
             }
 
-            string id = "accuracy" + bracket;
-            return Column.Num(id, AccuracyWidth, Key + "Accuracy", it => ((RangedGear)it).AccuracyFor(bracket), Format.F1);
+            return new Column
+            {
+                Id = "accuracy",
+                Icon = "accuracy" + bracket,
+                Width = AccuracyWidth,
+                HeaderKey = Key + "Accuracy",
+                Cell = it => Format.F1(((RangedGear)it).AccuracyFor(bracket)),
+                FloatKey = it => ((RangedGear)it).AccuracyFor(bracket)
+            };
         }
 
         private static Column AccuracyTurret(AccuracyBracket bracket)
@@ -248,14 +263,22 @@ namespace GearStats
                 return new Column
                 {
                     Id = "accuracy",
+                    Icon = "accuracy",
                     Width = AccuracyWidth,
                     HeaderKey = Key + "Accuracy",
                     Cell = it => ((TurretGear)it).AccuracyCell()
                 };
             }
 
-            string id = "accuracy" + bracket;
-            return Column.Num(id, AccuracyWidth, Key + "Accuracy", it => ((TurretGear)it).AccuracyFor(bracket), Format.F1);
+            return new Column
+            {
+                Id = "accuracy",
+                Icon = "accuracy" + bracket,
+                Width = AccuracyWidth,
+                HeaderKey = Key + "Accuracy",
+                Cell = it => Format.F1(((TurretGear)it).AccuracyFor(bracket)),
+                FloatKey = it => ((TurretGear)it).AccuracyFor(bracket)
+            };
         }
 
         private static Column DamageType()
