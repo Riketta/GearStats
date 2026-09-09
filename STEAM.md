@@ -20,7 +20,7 @@ View stats of every weapon, piece of apparel and turret on the map: damage, DPS,
 [h3]Compatibility[/h3]
 Requires RimWorld 1.6. No other dependencies.
 [list][*]Modded weapons and apparel are picked up automatically, nothing is hardcoded to specific defs.
-[*]Combat Extended columns (bulk, sway, spread, sights, magazine, AP) appear when CE is active.
+[*]Combat Extended columns (sway, spread, sights, magazine, AP) appear when CE is active.
 [*]Items in Weapon Storage or Change Dresser containers are included when those mods are present.[/list]
 
 Fork of "Weapons Tab" by bodlosh.

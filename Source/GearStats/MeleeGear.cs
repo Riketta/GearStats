@@ -120,12 +120,9 @@ namespace GearStats
 
         private void FillDamageType(VerbUtility.VerbPropertiesWithSource pair)
         {
-            if (pair.tool?.capacities != null)
+            if (pair.tool?.capacities != null && pair.tool.capacities.Count > 0)
             {
-                foreach (ToolCapacityDef capacity in pair.tool.capacities)
-                {
-                    DamageType = capacity.label + " (" + pair.tool.label + ")";
-                }
+                DamageType = pair.tool.capacities[0].label + " (" + pair.tool.label + ")";
             }
             else
             {

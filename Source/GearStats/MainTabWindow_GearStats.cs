@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using RimWorld;
 using UnityEngine;
@@ -38,6 +39,13 @@ namespace GearStats
 
         /// <summary>Reusable stat prototypes for craftable items, keyed by produced def.</summary>
         private readonly Dictionary<ThingDef, Thing> protoCache = new Dictionary<ThingDef, Thing>();
+
+        /// <summary>Reflection accessors for optional storage mods, resolved once per concrete type.</summary>
+        private static readonly Dictionary<Type, (MethodInfo getWeapons, PropertyInfo apparel)> StorageAccessors
+            = new Dictionary<Type, (MethodInfo, PropertyInfo)>();
+
+        /// <summary>Vanilla grenade category; has no ThingCategoryDefOf entry, so looked up by name once.</summary>
+        private static readonly ThingCategoryDef GrenadeCategory = DefDatabase<ThingCategoryDef>.GetNamedSilentFail("Grenades");
 
         private bool isDirty = true;
         private int listUpdateNext;
@@ -385,7 +393,7 @@ namespace GearStats
                         Texture2D arrow = Icons.Get(ascending ? "UI/Icons/Sorting" : "UI/Icons/SortingDescending");
                         if (arrow != null)
                         {
-                            GUI.DrawTexture(new Rect(rect.xMax - arrow.width - 30f, rect.yMax - arrow.height - 1f,
+                            GUI.DrawTexture(new Rect(rect.xMax - arrow.width - 1f, rect.yMax - arrow.height - 1f,
                                 arrow.width, arrow.height), arrow);
                         }
                     }
@@ -560,7 +568,7 @@ namespace GearStats
 
             if (def.IsRangedWeapon)
             {
-                bool grenade = def.thingCategories != null && def.thingCategories.Any(c => c.defName == "Grenades");
+                bool grenade = def.thingCategories != null && def.thingCategories.Contains(GrenadeCategory);
                 return grenade ? GearKind.Grenades : GearKind.Ranged;
             }
 
@@ -648,6 +656,17 @@ namespace GearStats
                         }
                     }
                 }
+
+                if (pawn.inventory != null)
+                {
+                    foreach (Thing carried in pawn.inventory.innerContainer)
+                    {
+                        if (GetKind(carried) is GearKind kind)
+                        {
+                            AddGear(carried, kind, owned);
+                        }
+                    }
+                }
             }
         }
 
@@ -660,11 +679,14 @@ namespace GearStats
                     continue;
                 }
 
+                // Slaves and colony mechs are player-owned gear carriers like colonists;
+                // wildmen and foreign pawns follow the faction filters.
+                bool playerOwned = pawn.IsColonist || pawn.IsSlaveOfColony || pawn.IsColonyMech;
                 bool hostile = !pawn.IsColonist && pawn.HostileTo(Faction.OfPlayer);
                 bool friendly = !pawn.IsColonist && !hostile;
 
                 OwnerKind owner;
-                if (pawn.IsColonist && showColonists) owner = OwnerKind.Colonist;
+                if (playerOwned && showColonists) owner = OwnerKind.Colonist;
                 else if (pawn.IsPrisonerOfColony && showPrisoners) owner = OwnerKind.Prisoner;
                 else if (hostile && showHostiles) owner = OwnerKind.Hostile;
                 else if (friendly && showFriendlies) owner = OwnerKind.Friendly;
@@ -709,16 +731,24 @@ namespace GearStats
             foreach (Building_Storage storage in map.listerBuildings.AllBuildingsColonistOfClass<Building_Storage>())
             {
                 Type type = storage.GetType();
+                if (!StorageAccessors.TryGetValue(type, out (MethodInfo getWeapons, PropertyInfo apparel) accessors))
+                {
+                    // Optional mods are resolved by reflection only when they are loaded.
+                    accessors = (
+                        type.FullName == "WeaponStorage.Building_WeaponStorage" ? type.GetMethod("GetWeapons") : null,
+                        type.FullName == "ChangeDresser.Building_Dresser" ? type.GetProperty("Apparel") : null);
+                    StorageAccessors[type] = accessors;
+                }
+
                 Action<GearItem> stored = it =>
                 {
                     it.InStorage = true;
                     it.StoragePos = storage.Position;
                 };
 
-                // Optional mods are resolved by reflection only when they are loaded.
-                if (type.FullName == "WeaponStorage.Building_WeaponStorage")
+                if (accessors.getWeapons != null)
                 {
-                    var weapons = type.GetMethod("GetWeapons")?.Invoke(storage, new object[] { true })
+                    var weapons = accessors.getWeapons.Invoke(storage, new object[] { true })
                         as IEnumerable<ThingWithComps>;
                     if (weapons != null)
                     {
@@ -731,9 +761,9 @@ namespace GearStats
                         }
                     }
                 }
-                else if (type.FullName == "ChangeDresser.Building_Dresser")
+                else if (accessors.apparel != null)
                 {
-                    var apparels = type.GetProperty("Apparel")?.GetValue(storage) as IEnumerable<Apparel>;
+                    var apparels = accessors.apparel.GetValue(storage) as IEnumerable<Apparel>;
                     if (apparels != null)
                     {
                         foreach (Apparel apparel in apparels)

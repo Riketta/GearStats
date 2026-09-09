@@ -171,16 +171,18 @@ namespace GearStats
                 th.GetStatValue(StatDefOf.AccuracyLong));
         }
 
+        /// <summary>Bracket accuracy in percent (vanilla stats are 0-1 fractions);
+        /// brackets outside the weapon's range stay 0.</summary>
         private void FillAccuracy(float touch, float shot, float medium, float longR)
         {
             if (MinRange <= AccuracyText.Touch && MaxRange >= AccuracyText.Touch)
-                AccuracyTouch = Round(touch, 2);
+                AccuracyTouch = Round(touch * 100f, 2);
             if (MinRange <= AccuracyText.Short && MaxRange >= AccuracyText.Short)
-                AccuracyShort = Round(shot, 2);
+                AccuracyShort = Round(shot * 100f, 2);
             if (MinRange <= AccuracyText.Medium && MaxRange >= AccuracyText.Medium)
-                AccuracyMedium = Round(medium, 2);
+                AccuracyMedium = Round(medium * 100f, 2);
             if (MinRange <= AccuracyText.Long && MaxRange >= AccuracyText.Long)
-                AccuracyLong = Round(longR, 2);
+                AccuracyLong = Round(longR * 100f, 2);
         }
 
         private void ComputeDps()

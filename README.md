@@ -35,7 +35,7 @@ grenades, apparel and turrets.
 
 - No hardcoded defs: modded weapons and apparel are picked up from their stats
   like vanilla gear.
-- Combat Extended: extra columns (bulk, sway, spread, sights, magazine capacity,
+- Combat Extended: extra columns (sway, spread, sights, magazine capacity,
   counter-parry, AP) appear automatically when CE is active.
 - Weapon Storage and Change Dresser: items stored in their containers are
   included when those mods are loaded.

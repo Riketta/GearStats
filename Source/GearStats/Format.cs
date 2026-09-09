@@ -1,4 +1,5 @@
 using System.Globalization;
+using Verse;
 
 namespace GearStats
 {
@@ -30,15 +31,16 @@ namespace GearStats
     }
 
     /// <summary>
-    /// Vanilla accuracy range brackets (in cells) and rendering of the four brackets
-    /// in one cell; brackets outside the weapon's range are shown as "-".
+    /// Vanilla accuracy range brackets and rendering of the four brackets in one
+    /// cell; brackets outside the weapon's range are shown as "-".
     /// </summary>
     internal static class AccuracyText
     {
-        public const float Touch = 3f;
-        public const float Short = 12f;
-        public const float Medium = 25f;
-        public const float Long = 40f;
+        // Vanilla measurement distances, as used by VerbProperties.GetHitChanceFactor.
+        public const float Touch = ShootTuning.DistTouch;
+        public const float Short = ShootTuning.DistShort;
+        public const float Medium = ShootTuning.DistMedium;
+        public const float Long = ShootTuning.DistLong;
 
         public static string Cell(float minRange, float maxRange, float touch, float shot, float medium, float longR)
         {

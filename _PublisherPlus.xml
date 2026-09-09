@@ -3,6 +3,7 @@
   <Title>Gear Stats</Title>
   <Excluded>
     <exclude>.git</exclude>
+    <exclude>.gitignore</exclude>
     <exclude>Source</exclude>
     <exclude>STEAM.md</exclude>
     <exclude>TLDR.md</exclude>
