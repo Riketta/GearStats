@@ -68,7 +68,8 @@ namespace GearStats
 
         /// <summary>Vanilla shooter math: damage x life stage x MeleeDamageFactor, cooldown
         /// x MeleeCooldownFactor, armor penetration re-weighted, DPS = weighted damage /
-        /// weighted cooldown (mirrors StatWorker_MeleeAverageDPS with an attacker).</summary>
+        /// weighted cooldown (mirrors StatWorker_MeleeAverageDPS with an attacker), times
+        /// the attacker's melee hit chance like the vanilla pawn stat StatWorker_MeleeDPS.</summary>
         protected override void AdjustForShooter(Pawn shooter)
         {
             if (bestPair != null)
@@ -93,6 +94,14 @@ namespace GearStats
                     x => ShooterWeight(x, shooter),
                     x => x.verbProps.AdjustedCooldown(x.tool, shooter, Thing));
                 Dps = cooldown > 0f ? damage / cooldown : 0f;
+
+                // StatWorker_MeleeDPS folds the attacker's melee hit chance into the pawn's
+                // DPS; vanilla hides the stat when hit chance is disabled (e.g. some races),
+                // in which case the raw DPS is shown.
+                if (!StatDefOf.MeleeHitChance.Worker.IsDisabledFor(shooter))
+                {
+                    Dps *= shooter.GetStatValue(StatDefOf.MeleeHitChance);
+                }
             }
         }
 

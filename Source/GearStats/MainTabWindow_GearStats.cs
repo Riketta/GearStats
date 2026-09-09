@@ -160,8 +160,14 @@ namespace GearStats
             var sb = new StringBuilder();
             AppendShooterEffect(sb, pawn, StatDefOf.AimingDelayFactor, "GearStats.EffAiming".Translate());
             AppendShooterEffect(sb, pawn, StatDefOf.RangedCooldownFactor, "GearStats.EffRangedCooldown".Translate());
-            AppendShooterEffect(sb, pawn, StatDefOf.MeleeCooldownFactor, "GearStats.EffMeleeCooldown".Translate());
+            AppendShooterEffect(sb, pawn, StatDefOf.ShootingAccuracyPawn, "GearStats.EffShootingAccuracy".Translate());
+            AppendShooterEffect(sb, pawn, StatDefOf.ShootingAccuracyFactor_Touch, "GearStats.EffAccTouch".Translate());
+            AppendShooterEffect(sb, pawn, StatDefOf.ShootingAccuracyFactor_Short, "GearStats.EffAccShort".Translate());
+            AppendShooterEffect(sb, pawn, StatDefOf.ShootingAccuracyFactor_Medium, "GearStats.EffAccMedium".Translate());
+            AppendShooterEffect(sb, pawn, StatDefOf.ShootingAccuracyFactor_Long, "GearStats.EffAccLong".Translate());
             AppendShooterEffect(sb, pawn, StatDefOf.MeleeDamageFactor, "GearStats.EffMeleeDamage".Translate());
+            AppendShooterEffect(sb, pawn, StatDefOf.MeleeCooldownFactor, "GearStats.EffMeleeCooldown".Translate());
+            AppendShooterEffect(sb, pawn, StatDefOf.MeleeHitChance, "GearStats.EffMeleeHitChance".Translate());
 
             if (sb.Length == 0)
             {

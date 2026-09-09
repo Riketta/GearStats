@@ -77,9 +77,10 @@ namespace GearStats
             ComputeDpsa();
         }
 
-        /// <summary>Vanilla AdjustedCooldown/AdjustedRange math: warmup scales with the
-        /// shooter's AimingDelayFactor (Verb.WarmupStance), cooldown with RangedCooldownFactor
-        /// (genes, traits); a verb with a rangeStat reads its range from the shooter.</summary>
+        /// <summary>Vanilla shooter math: warmup scales with AimingDelayFactor, cooldown
+        /// with RangedCooldownFactor; a verb with a rangeStat reads its range from the
+        /// shooter; hit chance scales the weapon's accuracy with the shooter's per-cell
+        /// accuracy (ShotReport.HitReportFor).</summary>
         protected override void AdjustForShooter(Pawn shooter)
         {
             Warmup *= shooter.GetStatValue(StatDefOf.AimingDelayFactor);
@@ -89,8 +90,39 @@ namespace GearStats
                 MaxRange = shooter.GetStatValue(mainVerb.rangeStat);
             }
 
+            // Verbs that cannot shoot wild (mortars) do not use the shooter's accuracy.
+            if (mainVerb == null || mainVerb.canGoWild)
+            {
+                float pawnAcc = shooter.GetStatValue(StatDefOf.ShootingAccuracyPawn);
+                AccuracyTouch = AdjustedAccuracy(AccuracyText.Touch, pawnAcc,
+                    shooter.GetStatValue(StatDefOf.ShootingAccuracyFactor_Touch), StatDefOf.AccuracyTouch);
+                AccuracyShort = AdjustedAccuracy(AccuracyText.Short, pawnAcc,
+                    shooter.GetStatValue(StatDefOf.ShootingAccuracyFactor_Short), StatDefOf.AccuracyShort);
+                AccuracyMedium = AdjustedAccuracy(AccuracyText.Medium, pawnAcc,
+                    shooter.GetStatValue(StatDefOf.ShootingAccuracyFactor_Medium), StatDefOf.AccuracyMedium);
+                AccuracyLong = AdjustedAccuracy(AccuracyText.Long, pawnAcc,
+                    shooter.GetStatValue(StatDefOf.ShootingAccuracyFactor_Long), StatDefOf.AccuracyLong);
+            }
+
             ComputeDps();
             ComputeDpsa();
+        }
+
+        /// <summary>Hit chance at a bracket distance, mirroring ShotReport.HitFactorFromShooter
+        /// and VerbProperties.GetHitChanceFactor: weapon accuracy clamped to 1-100%, times
+        /// the shooter's per-cell accuracy exponentiated by distance (traits, genes, hediffs
+        /// via the stat) and the range-category factor stat, floored at 2.01% and capped at
+        /// 100%. Brackets outside the weapon's range stay 0 and render as "-".</summary>
+        private float AdjustedAccuracy(float distance, float pawnAcc, float rangeFactor, StatDef accuracyStat)
+        {
+            if (MinRange > distance || MaxRange < distance)
+            {
+                return 0f;
+            }
+
+            float weapon = Mathf.Clamp(Thing.GetStatValue(accuracyStat), 0.01f, 1f);
+            float shooter = Mathf.Max(Mathf.Pow(pawnAcc, distance) * rangeFactor, 0.0201f);
+            return Round(Mathf.Min(weapon * shooter, 1f) * 100f, 2);
         }
 
         private void FillVanilla(Thing th)

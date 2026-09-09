@@ -1,4 +1,5 @@
 using RimWorld;
+using UnityEngine;
 using Verse;
 
 namespace GearStats
@@ -56,16 +57,32 @@ namespace GearStats
                 }
             }
 
-            if (MinRange <= AccuracyText.Touch && MaxRange >= AccuracyText.Touch)
-                AccuracyTouch = Round(gunDef.GetStatValueAbstract(StatDefOf.AccuracyTouch) * 100f);
-            if (MinRange <= AccuracyText.Short && MaxRange >= AccuracyText.Short)
-                AccuracyShort = Round(gunDef.GetStatValueAbstract(StatDefOf.AccuracyShort) * 100f);
-            if (MinRange <= AccuracyText.Medium && MaxRange >= AccuracyText.Medium)
-                AccuracyMedium = Round(gunDef.GetStatValueAbstract(StatDefOf.AccuracyMedium) * 100f);
-            if (MinRange <= AccuracyText.Long && MaxRange >= AccuracyText.Long)
-                AccuracyLong = Round(gunDef.GetStatValueAbstract(StatDefOf.AccuracyLong) * 100f);
+            float turretAcc = th.GetStatValue(StatDefOf.ShootingAccuracyTurret);
+            bool applyAccuracy = verb == null || verb.canGoWild;
+            AccuracyTouch = AdjustedAccuracy(AccuracyText.Touch, turretAcc, gunDef.GetStatValueAbstract(StatDefOf.AccuracyTouch), applyAccuracy);
+            AccuracyShort = AdjustedAccuracy(AccuracyText.Short, turretAcc, gunDef.GetStatValueAbstract(StatDefOf.AccuracyShort), applyAccuracy);
+            AccuracyMedium = AdjustedAccuracy(AccuracyText.Medium, turretAcc, gunDef.GetStatValueAbstract(StatDefOf.AccuracyMedium), applyAccuracy);
+            AccuracyLong = AdjustedAccuracy(AccuracyText.Long, turretAcc, gunDef.GetStatValueAbstract(StatDefOf.AccuracyLong), applyAccuracy);
 
             Cooldown = gunDef.GetStatValueAbstract(StatDefOf.RangedWeapon_Cooldown);
+        }
+
+        /// <summary>Hit chance at a bracket distance for non-pawn casters, mirroring
+        /// ShotReport.HitFactorFromShooter: weapon accuracy clamped to 1-100%, times the
+        /// turret's ShootingAccuracyTurret exponentiated by distance (no range-category
+        /// factor), floored at 2.01% and capped at 100%. Verbs that cannot shoot wild
+        /// (mortars) ignore the turret accuracy entirely; brackets outside the weapon's
+        /// range stay 0 and render as "-".</summary>
+        private float AdjustedAccuracy(float distance, float turretAcc, float weaponAccuracy, bool applyAccuracy)
+        {
+            if (!applyAccuracy || MinRange > distance || MaxRange < distance)
+            {
+                return 0f;
+            }
+
+            float weapon = Mathf.Clamp(weaponAccuracy, 0.01f, 1f);
+            float factor = Mathf.Max(Mathf.Pow(turretAcc, distance), 0.0201f);
+            return Round(Mathf.Min(weapon * factor, 1f) * 100f);
         }
 
         private static VerbProperties VerbWithProjectile(ThingDef def)

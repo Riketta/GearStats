@@ -59,9 +59,15 @@
   <GearStats.UniqueTraits>Unique weapon traits: {0}</GearStats.UniqueTraits>
   <GearStats.EffAiming>Aiming time (ranged, grenades)</GearStats.EffAiming>
   <GearStats.EffRangedCooldown>Cooldown (ranged, grenades)</GearStats.EffRangedCooldown>
+  <GearStats.EffShootingAccuracy>Shooting accuracy (per cell of distance)</GearStats.EffShootingAccuracy>
+  <GearStats.EffAccTouch>Hit chance factor: touch range</GearStats.EffAccTouch>
+  <GearStats.EffAccShort>Hit chance factor: short range</GearStats.EffAccShort>
+  <GearStats.EffAccMedium>Hit chance factor: medium range</GearStats.EffAccMedium>
+  <GearStats.EffAccLong>Hit chance factor: long range</GearStats.EffAccLong>
   <GearStats.EffMeleeCooldown>Cooldown (melee)</GearStats.EffMeleeCooldown>
   <GearStats.EffMeleeDamage>Damage (melee)</GearStats.EffMeleeDamage>
+  <GearStats.EffMeleeHitChance>Melee hit chance</GearStats.EffMeleeHitChance>
   <GearStats.EffLifeStage>Life stage</GearStats.EffLifeStage>
-  <GearStats.ShooterNoEffects>No stat of this pawn changes weapon stats in this table. Shooting skill affects hit chance only, not the stats listed here.</GearStats.ShooterNoEffects>
+  <GearStats.ShooterNoEffects>No stat of this pawn changes weapon stats in this table.</GearStats.ShooterNoEffects>
 
 </LanguageData>

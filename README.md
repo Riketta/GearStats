@@ -18,11 +18,12 @@ grenades, apparel and turrets.
   colonists, friendlies, hostiles or prisoners, items on corpses, craftable
   items and items in storage.
 - Click the pawn button to apply a pawn's stats - shooting skill, genes, traits,
-  age - to all weapon rows: aiming time, cooldown, melee damage and armor
-  penetration and effective range recompute exactly as the game does when that
-  pawn fires the weapon. "Pawn: none" returns the raw stats. Hover the pawn
-  button to see which of the pawn's traits, genes and hediffs shift aiming time,
-  cooldown or melee damage, with the game's own value breakdown per stat.
+  age - to all weapon rows: aiming time, cooldown, melee damage, armor
+  penetration, effective range and per-bracket hit chance recompute exactly as
+  the game does when that pawn fires the weapon. "Pawn: none" returns the raw
+  stats. Hover the pawn button to see which of the pawn's traits, genes and
+  hediffs shift aiming time, cooldown, shooting accuracy, melee damage or melee
+  hit chance, with the game's own value breakdown per stat.
 - Ranged weapons can switch the accuracy column between all/average and a single
   range bracket, labeled with its actual distances, e.g. "Short (3-12)". The
   sorted column survives bracket switches.
@@ -50,12 +51,16 @@ grenades, apparel and turrets.
 - The main tab is registered as a `MainButtonDef`, so other mods can reorder or
   remove it through normal def XML.
 - Shooter-adjusted numbers mirror the vanilla formulas (`VerbProperties.AdjustedCooldown`,
-  `AdjustedMeleeDamageAmount`, `GetDamageFactorFor`) instead of approximating
-  them, so the table always agrees with what the pawn would actually dish out.
+  `AdjustedMeleeDamageAmount`, `GetDamageFactorFor`, `ShotReport.HitFactorFromShooter`,
+  `VerbProperties.GetHitChanceFactor`) instead of approximating them, so the table
+  always agrees with what the pawn would actually dish out. Turret accuracy applies
+  the turret's `ShootingAccuracyTurret` the same way.
 - Melee: damage and cooldown show the weapon's strongest attack with quality and
   material multipliers; DPS is the vanilla selection-weighted average across all
   its tools. With a pawn selected both are computed exactly like
-  `StatWorker_MeleeAverageDPS` computes them for the wielding pawn.
+  `StatWorker_MeleeAverageDPS` computes them for the wielding pawn, and DPS is
+  multiplied by the pawn's melee hit chance like the vanilla pawn stat
+  (`StatWorker_MeleeDPS`).
 
 ## Build from source
 
