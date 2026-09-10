@@ -104,10 +104,13 @@ namespace GearStats
                 Quality = qc;
             }
 
-            // Odyssey unique weapons: trait offsets/factors already flow through
-            // GetStatValue; surface the trait list for the name tooltip.
+            // Odyssey unique weapons: the comp renames the weapon (CompUniqueWeapon
+            // .TransformLabel) and carries its trait list - without the rename the
+            // table would show them as a generic "revolver". Trait offsets/factors
+            // already flow through GetStatValue like in vanilla combat.
             if (th.TryGetComp<CompUniqueWeapon>(out CompUniqueWeapon unique) && unique.TraitsListForReading.Count > 0)
             {
+                Label = unique.TransformLabel(Label);
                 Traits = unique.TraitsListForReading.Select(t => t.LabelCap.RawText).ToCommaList().CapitalizeFirst();
             }
         }
