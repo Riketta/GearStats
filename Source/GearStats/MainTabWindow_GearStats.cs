@@ -312,12 +312,16 @@ namespace GearStats
             List<Column> columns = GearColumns.For(kind, ce, accBracket);
             List<GearItem> items = gear[kind];
 
+            float tableHeight = items.Count * RowHeight;
+
             GUI.BeginGroup(rect);
 
             DrawHeaderRow(rect.width, kind, columns);
 
-            float tableHeight = items.Count * RowHeight;
-            var contentRect = new Rect(0f, HeaderRowHeight, rect.width - 16f, tableHeight + 40f);
+            // The viewRect must start at y = 0: rows are drawn from the group origin, and
+            // a non-zero viewRect.y shifts the whole list up behind the header row (the
+            // first row disappears). outRect starts below the fixed header instead.
+            var contentRect = new Rect(0f, 0f, rect.width - 16f, tableHeight);
             var scrollRect = new Rect(0f, HeaderRowHeight, rect.width, rect.height - HeaderRowHeight);
 
             Widgets.BeginScrollView(scrollRect, ref scrollPosition, contentRect);
