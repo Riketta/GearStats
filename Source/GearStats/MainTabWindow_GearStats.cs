@@ -758,9 +758,19 @@ namespace GearStats
                 if (!StorageAccessors.TryGetValue(type, out (MethodInfo getWeapons, PropertyInfo apparel) accessors))
                 {
                     // Optional mods are resolved by reflection only when they are loaded.
-                    accessors = (
-                        type.FullName == "WeaponStorage.Building_WeaponStorage" ? type.GetMethod("GetWeapons") : null,
-                        type.FullName == "ChangeDresser.Building_Dresser" ? type.GetProperty("Apparel") : null);
+                    // A broken match (renamed or overloaded member) must not throw on every
+                    // refresh; it just disables the collector for that type.
+                    try
+                    {
+                        accessors = (
+                            type.FullName == "WeaponStorage.Building_WeaponStorage" ? type.GetMethod("GetWeapons") : null,
+                            type.FullName == "ChangeDresser.Building_Dresser" ? type.GetProperty("Apparel") : null);
+                    }
+                    catch (AmbiguousMatchException)
+                    {
+                        accessors = (null, null);
+                    }
+
                     StorageAccessors[type] = accessors;
                 }
 

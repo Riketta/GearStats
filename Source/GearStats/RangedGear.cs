@@ -91,7 +91,9 @@ namespace GearStats
             }
 
             // Verbs that cannot shoot wild (mortars) do not use the shooter's accuracy.
-            if ((mainVerb == null || mainVerb.canGoWild) && CombatStats.ShootingAccuracy != null)
+            // CE replaces vanilla hit chance with its own spread/sway/visibility model,
+            // so the vanilla shooter accuracy does not apply to the displayed brackets.
+            if (!Ce && (mainVerb == null || mainVerb.canGoWild) && CombatStats.ShootingAccuracy != null)
             {
                 float pawnAcc = shooter.GetStatValue(CombatStats.ShootingAccuracy);
                 AccuracyTouch = AdjustedAccuracy(AccuracyText.Touch, pawnAcc,
@@ -111,8 +113,9 @@ namespace GearStats
         /// <summary>Hit chance at a bracket distance, mirroring ShotReport.HitFactorFromShooter
         /// and VerbProperties.GetHitChanceFactor: weapon accuracy clamped to 1-100%, times
         /// the shooter's per-cell accuracy exponentiated by distance (traits, genes, hediffs
-        /// via the stat) and the range-category factor stat, floored at 2.01% and capped at
-        /// 100%. Brackets outside the weapon's range stay 0 and render as "-".</summary>
+        /// via the stat) and the range-category factor stat; the combined chance is floored
+        /// at 2.01% and capped at 100% like ShotReport.AimOnTargetChance_StandardTarget.
+        /// Brackets outside the weapon's range stay 0 and render as "-".</summary>
         private float AdjustedAccuracy(float distance, float pawnAcc, float rangeFactor, StatDef accuracyStat)
         {
             if (MinRange > distance || MaxRange < distance)
@@ -122,7 +125,7 @@ namespace GearStats
 
             float weapon = Mathf.Clamp(Thing.GetStatValue(accuracyStat), 0.01f, 1f);
             float shooter = Mathf.Max(Mathf.Pow(pawnAcc, distance) * rangeFactor, 0.0201f);
-            return Round(Mathf.Min(weapon * shooter, 1f) * 100f, 2);
+            return Round(Mathf.Clamp(weapon * shooter, 0.0201f, 1f) * 100f, 2);
         }
 
         private void FillVanilla(Thing th)
@@ -234,14 +237,10 @@ namespace GearStats
 
             float sum = 0f;
             int count = 0;
-            foreach (float accuracy in new[] { AccuracyTouch, AccuracyShort, AccuracyMedium, AccuracyLong })
-            {
-                if (accuracy > 0f)
-                {
-                    sum += accuracy;
-                    count++;
-                }
-            }
+            if (AccuracyTouch > 0f) { sum += AccuracyTouch; count++; }
+            if (AccuracyShort > 0f) { sum += AccuracyShort; count++; }
+            if (AccuracyMedium > 0f) { sum += AccuracyMedium; count++; }
+            if (AccuracyLong > 0f) { sum += AccuracyLong; count++; }
 
             Dpsa = count > 0 ? Round(Dps * sum / count / 100f, 1) : 0f;
         }

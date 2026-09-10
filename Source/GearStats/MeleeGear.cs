@@ -97,9 +97,11 @@ namespace GearStats
 
                 // StatWorker_MeleeDPS folds the attacker's melee hit chance into the pawn's
                 // DPS; vanilla hides the stat when hit chance is disabled (e.g. some races),
-                // in which case the raw DPS is shown.
-                if (CombatStats.MeleeHitChance == null
-                    || !CombatStats.MeleeHitChance.Worker.IsDisabledFor(shooter))
+                // in which case the raw DPS is shown. CE computes melee hit chance from its
+                // own model, so the vanilla stat is not folded in under CE.
+                if (!Ce
+                    && (CombatStats.MeleeHitChance == null
+                        || !CombatStats.MeleeHitChance.Worker.IsDisabledFor(shooter)))
                 {
                     Dps *= CombatStats.Value(shooter, CombatStats.MeleeHitChance);
                 }

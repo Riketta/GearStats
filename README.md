@@ -55,20 +55,24 @@ grenades, apparel and turrets.
   `AdjustedMeleeDamageAmount`, `GetDamageFactorFor`, `ShotReport.HitFactorFromShooter`,
   `VerbProperties.GetHitChanceFactor`) instead of approximating them, so the table
   always agrees with what the pawn would actually dish out. Turret accuracy applies
-  the turret's `ShootingAccuracyTurret` the same way.
+  the turret's `ShootingAccuracyTurret` the same way, and turret warmup and cooldown
+  come from the turret building's `turretBurstWarmupTime` (shown as the midpoint of
+  its range) and `turretBurstCooldownTime` (falling back to the gun verb's cooldown) -
+  the values the game actually cycles on, which can differ from the gun def's stats.
 - Melee: damage and cooldown show the weapon's strongest attack with quality and
   material multipliers; DPS is the vanilla selection-weighted average across all
   its tools. With a pawn selected both are computed exactly like
   `StatWorker_MeleeAverageDPS` computes them for the wielding pawn, and DPS is
   multiplied by the pawn's melee hit chance like the vanilla pawn stat
   (`StatWorker_MeleeDPS`).
+- With Combat Extended, shooter adjustment of the accuracy and melee hit chance
+  columns is skipped: CE replaces those mechanics with its own spread, sway and hit
+  chance model. Damage, cooldown and range still scale with the pawn's stats.
 - The combat stat list is curated to mirror vanilla's code, which hardcodes these
   same links, and is resolved through `DefDatabase` at load: a mod that removes a
   stat only neutralizes that one adjustment instead of crashing. What modifies
   each stat is always read at runtime through the regular stat system, so modded
   traits, genes and hediffs count without any per-mod support.
-  multiplied by the pawn's melee hit chance like the vanilla pawn stat
-  (`StatWorker_MeleeDPS`).
 
 ## Build from source
 

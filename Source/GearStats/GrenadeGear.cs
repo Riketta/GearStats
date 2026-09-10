@@ -45,8 +45,8 @@ namespace GearStats
         /// and the AimingDelayFactor warmup multiplier from Verb.WarmupStance).</summary>
         protected override void AdjustForShooter(Pawn shooter)
         {
-            Warmup *= shooter.GetStatValue(StatDefOf.AimingDelayFactor);
-            Cooldown *= shooter.GetStatValue(StatDefOf.RangedCooldownFactor);
+            Warmup *= CombatStats.Value(shooter, CombatStats.AimingDelay);
+            Cooldown *= CombatStats.Value(shooter, CombatStats.RangedCooldown);
             if (mainVerb?.rangeStat != null)
             {
                 MaxRange = shooter.GetStatValue(mainVerb.rangeStat);
