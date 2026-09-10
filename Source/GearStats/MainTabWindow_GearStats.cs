@@ -401,29 +401,36 @@ namespace GearStats
                     {
                         GUI.DrawTexture(rect, icon);
                     }
+                }
 
-                    TooltipHandler.TipRegion(rect, col.HeaderKey.Translate());
-                    if (Mouse.IsOver(rect))
-                    {
-                        GUI.DrawTexture(rect, TexUI.HighlightTex);
-                    }
+                // Plain-text non-sortable headers (damage type) stay inert.
+                if (col.TextHeader && !col.Sortable)
+                {
+                    x += col.Width;
+                    continue;
+                }
 
-                    if (col.Sortable && Widgets.ButtonInvisible(rect))
-                    {
-                        sortId = col.Id;
-                        ascending = !ascending;
-                        sorts[kind] = (sortId, ascending);
-                        SortTab(kind);
-                    }
+                TooltipHandler.TipRegion(rect, col.HeaderKey.Translate());
+                if (Mouse.IsOver(rect))
+                {
+                    GUI.DrawTexture(rect, TexUI.HighlightTex);
+                }
 
-                    if (col.Sortable && col.Id == sortId)
+                if (col.Sortable && Widgets.ButtonInvisible(rect))
+                {
+                    sortId = col.Id;
+                    ascending = !ascending;
+                    sorts[kind] = (sortId, ascending);
+                    SortTab(kind);
+                }
+
+                if (col.Sortable && col.Id == sortId)
+                {
+                    Texture2D arrow = Icons.Get(ascending ? "UI/Icons/Sorting" : "UI/Icons/SortingDescending");
+                    if (arrow != null)
                     {
-                        Texture2D arrow = Icons.Get(ascending ? "UI/Icons/Sorting" : "UI/Icons/SortingDescending");
-                        if (arrow != null)
-                        {
-                            GUI.DrawTexture(new Rect(rect.xMax - arrow.width - 1f, rect.yMax - arrow.height - 1f,
-                                arrow.width, arrow.height), arrow);
-                        }
+                        GUI.DrawTexture(new Rect(rect.xMax - arrow.width - 1f, rect.yMax - arrow.height - 1f,
+                            arrow.width, arrow.height), arrow);
                     }
                 }
 

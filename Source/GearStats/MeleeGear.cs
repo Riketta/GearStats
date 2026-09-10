@@ -52,6 +52,12 @@ namespace GearStats
                     x => x.verbProps.AdjustedArmorPenetration(x.tool, null, th.def, th.Stuff, null));
             }
 
+            // Strongest single hit across all attacks - the blunt stun metric.
+            if (meleeVerbs.Count > 0)
+            {
+                MaxHit = meleeVerbs.Max(x => x.verbProps.AdjustedMeleeDamageAmount(x.tool, null, th.def, th.Stuff, null));
+            }
+
             // Weighted average like StatWorker_MeleeAverageDPS - computed explicitly so
             // equipped weapons stay raw here instead of silently using their holder.
             if (meleeVerbs.Count > 0)
@@ -95,13 +101,14 @@ namespace GearStats
                     x => x.verbProps.AdjustedCooldown(x.tool, shooter, Thing));
                 Dps = cooldown > 0f ? damage / cooldown : 0f;
 
+                // One hit is not scaled by melee hit chance, unlike DPS below.
+                MaxHit = meleeVerbs.Max(x => x.verbProps.AdjustedMeleeDamageAmount(x.tool, shooter, Thing, null));
+
                 // StatWorker_MeleeDPS folds the attacker's melee hit chance into the pawn's
                 // DPS; vanilla hides the stat when hit chance is disabled (e.g. some races),
-                // in which case the raw DPS is shown. CE computes melee hit chance from its
-                // own model, so the vanilla stat is not folded in under CE.
-                if (!Ce
-                    && (CombatStats.MeleeHitChance == null
-                        || !CombatStats.MeleeHitChance.Worker.IsDisabledFor(shooter)))
+                // in which case the raw DPS is shown.
+                if (CombatStats.MeleeHitChance == null
+                    || !CombatStats.MeleeHitChance.Worker.IsDisabledFor(shooter))
                 {
                     Dps *= CombatStats.Value(shooter, CombatStats.MeleeHitChance);
                 }

@@ -61,7 +61,8 @@ grenades, apparel and turrets.
   the values the game actually cycles on, which can differ from the gun def's stats.
 - Melee: damage and cooldown show the weapon's strongest attack with quality and
   material multipliers; DPS is the vanilla selection-weighted average across all
-  its tools. With a pawn selected both are computed exactly like
+  its tools; "Max hit" is the biggest single hit of any attack (the blunt stun
+  metric). With a pawn selected all of these are computed exactly like
   `StatWorker_MeleeAverageDPS` computes them for the wielding pawn, and DPS is
   multiplied by the pawn's melee hit chance like the vanilla pawn stat
   (`StatWorker_MeleeDPS`).

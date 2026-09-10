@@ -75,7 +75,7 @@ namespace GearStats
 
         private static List<Column> Melee(bool ce)
         {
-            var cols = new List<Column> { Label(), Quality(), Hp(), Dps(), Value(), Damage(), ArmorPenetration(), Cooldown() };
+            var cols = new List<Column> { Label(), Quality(), Hp(), Dps(), Value(), Damage(), MaxHit(), ArmorPenetration(), Cooldown() };
             if (ce)
             {
                 cols.Add(Num("ceCounterParry", Key + "CounterParry", it => ((MeleeGear)it).CeCounterParry, Format.F2));
@@ -213,6 +213,13 @@ namespace GearStats
         private static Column Damage()
         {
             return Column.Num("damage", StatWidth, Key + "Damage", it => it.Damage, Format.F2);
+        }
+
+        /// <summary>Melee only: biggest single hit of any attack (no icon texture shipped,
+        /// so the header is text - DrawHeaderRow makes sortable text headers clickable).</summary>
+        private static Column MaxHit()
+        {
+            return Column.Num("maxHit", StatWidth, Key + "MaxHit", it => it.MaxHit, Format.F2);
         }
 
         private static Column ArmorPenetration()

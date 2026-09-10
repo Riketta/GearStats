@@ -46,6 +46,7 @@ namespace GearStats
         public int HpPercent = 100;
         public float MarketValue;
         public float Damage;
+        public float MaxHit;
         public float ArmorPenetration;
         public float Dps;
         public float Cooldown;

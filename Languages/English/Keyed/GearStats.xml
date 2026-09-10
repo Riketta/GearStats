@@ -33,6 +33,7 @@
   <GearStats.ColDPS>DPS</GearStats.ColDPS>
   <GearStats.ColDPSA>DPS with accuracy</GearStats.ColDPSA>
   <GearStats.ColDamage>Damage</GearStats.ColDamage>
+  <GearStats.ColMaxHit>Max hit</GearStats.ColMaxHit>
   <GearStats.ColAccuracy>Accuracy</GearStats.ColAccuracy>
   <GearStats.ColType></GearStats.ColType>
   <GearStats.ColRadius>Explosion radius</GearStats.ColRadius>
